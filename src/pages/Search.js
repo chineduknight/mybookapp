@@ -3,17 +3,18 @@ import { useNavigate } from "react-router-dom";
 import * as BooksAPI from "../BooksAPI";
 import Book from "../components/Book";
 import _ from "lodash";
-
+import Loader from "../components/Loader";
 const Search = () => {
   const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [searchTerm, setsearchTerm] = useState("");
-  console.log("books:", books);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChanged = _.debounce(async function (event) {
     const searchTerm = event.target.value;
     setsearchTerm(searchTerm);
     if (searchTerm) {
+      setIsLoading(true);
       const searchResult = await BooksAPI.search(searchTerm);
       if (Array.isArray(searchResult)) {
         setBooks(searchResult);
@@ -23,6 +24,7 @@ const Search = () => {
     } else {
       setBooks([]);
     }
+    setIsLoading(false);
   }, 1000);
   const onSelect = async (toShelf, book) => {
     await BooksAPI.update(book, toShelf, book);
@@ -54,9 +56,15 @@ const Search = () => {
       </div>
       <div className="search-books-results">
         <ol className="books-grid">
-          {books.map((book) => (
-            <Book key={book.id} book={book} handleUpdate={onSelect} />
-          ))}
+          {isLoading ? (
+            <Loader />
+          ) : searchTerm && books.length === 0 ? (
+            <div>Nothing found</div>
+          ) : (
+            books.map((book) => (
+              <Book key={book.id} book={book} handleUpdate={onSelect} />
+            ))
+          )}
         </ol>
       </div>
     </div>
