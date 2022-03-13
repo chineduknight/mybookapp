@@ -1,5 +1,15 @@
 import PropTypes from "prop-types";
 import React from "react";
+/**
+ * Handles the display of books
+ *
+ * @param {string} book - the book obj
+ * @param {string} handleUpdate - A function to handle the shelf
+ *
+ * @return {JSX} Returns a React.Node
+
+ */
+
 const Book = (props) => {
   const { book, handleUpdate } = props;
   const { title, authors = [], imageLinks, shelf = "none" } = book;

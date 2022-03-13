@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as BooksAPI from "../BooksAPI";
 import Book from "../components/Book";
@@ -9,6 +9,20 @@ const Search = () => {
   const [books, setBooks] = useState([]);
   const [searchTerm, setsearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [allBooks, setAllBooks] = useState({});
+
+  const getAllBooks = async () => {
+    const bookList = await BooksAPI.getAll();
+    const bookObj = {};
+    bookList.forEach((book) => {
+      bookObj[book.id] = book;
+    });
+    setAllBooks(bookObj);
+  };
+
+  useEffect(() => {
+    getAllBooks();
+  }, []);
 
   const handleChanged = _.debounce(async function (event) {
     const searchTerm = event.target.value;
@@ -52,9 +66,22 @@ const Search = () => {
           ) : searchTerm && books.length === 0 ? (
             <div>Nothing found</div>
           ) : (
-            books.map((book) => (
-              <Book key={book.id} book={book} handleUpdate={onSelect} />
-            ))
+            books.map((book) => {
+              const doesBookExist = allBooks[book.id];
+              if (doesBookExist) {
+                return (
+                  <Book
+                    key={book.id}
+                    book={doesBookExist}
+                    handleUpdate={onSelect}
+                  />
+                );
+              } else {
+                return (
+                  <Book key={book.id} book={book} handleUpdate={onSelect} />
+                );
+              }
+            })
           )}
         </ol>
       </div>
